@@ -1,0 +1,4 @@
+*.replay
+node_modules
+*.txt
+replay.json
