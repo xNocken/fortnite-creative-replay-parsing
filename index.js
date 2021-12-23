@@ -18,8 +18,16 @@ const NetFieldExports = require('./netFieldExports');
     debug: true,
     handleEventEmitter: setListener,
     parseEvents: false,
+    useCheckpoints: true,
   });
   console.timeEnd();
+
+  const { framerates, pings } = parsedReplay.performances;
+
+  const avgFramerate = framerates.reduce((tot, cur) => tot + cur, 0) / framerates.length;
+  const avgPing = pings.reduce((tot, cur) => tot + cur, 0) / pings.length;
+
+  console.log(avgFramerate, avgPing);
 
   fs.writeFileSync('replay.json', JSON.stringify(parsedReplay, null, 2));
 })().catch((err) => {

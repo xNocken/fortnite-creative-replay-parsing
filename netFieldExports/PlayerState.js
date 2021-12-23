@@ -43,5 +43,10 @@ module.exports = {
       parseFunction: 'readBit',
       parseType: 'default',
     },
+    Ping: {
+      name: 'Ping',
+      parseFunction: 'readByte',
+      parseType: 'default',
+    },
   }
 }

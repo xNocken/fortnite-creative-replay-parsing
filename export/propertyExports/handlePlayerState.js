@@ -19,6 +19,10 @@ const handlePlayerState = ({ data, chIndex, result, states, changedProperties })
 
     playerData.PlayerNamePrivate = name.split('').map((a, i) => String.fromCharCode(a.charCodeAt() + ((name.length % 4 * 3 % 8 + 1 + i) * 3 % 8))).join('')
   }
+
+  if (data.Ping) {
+    states.performances.pings.push(data.Ping);
+  }
 };
 
 module.exports = handlePlayerState;
