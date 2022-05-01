@@ -9,13 +9,16 @@ class DebugObject extends OrigDebugObject {
     return this.data.readInt16LE();
   }
 
+  get json() {
+    return this.toJSON();
+  }
+
   toJSON() {
     return {
       ...super.toJSON(),
       int: undefined,
       int32: this.getValueAsInt(),
       int16: this.getValueAsInt16(),
-      int8: this.data[0],
       raw: this.data,
     };
   }

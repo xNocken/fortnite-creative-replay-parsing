@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "fortnite-replay-parser": "^1.4.1"
+    "fortnite-replay-parser": "xnocken/replay-reader#major"
   }
 }

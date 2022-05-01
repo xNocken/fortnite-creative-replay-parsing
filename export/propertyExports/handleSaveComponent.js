@@ -1,15 +1,10 @@
-const handleSaveComponent = ({ data, chIndex, result, states, changedProperties }) => {
-  if (!states.levelsavecomponent[chIndex]) {
-    states.levelsavecomponent[chIndex] = data;
-    result.gameData.levelsavecomponent.push(data);
-
-    return;
-  }
+const handleSaveComponent = ({ data, actorId, result, states, changedProperties }) => {
+  const volume = states.volumes[actorId];
 
   for (let i = 0; i < changedProperties.length; i += 1) {
     const key = changedProperties[i];
 
-    states.levelsavecomponent[chIndex][key] = data[key];
+    volume.mapInfos[key] = data[key];
   }
 };
 

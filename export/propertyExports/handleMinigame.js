@@ -22,14 +22,9 @@ const writePropertiesRecursive = (old, neww) => {
   return old;
 }
 
-const indexToPlayer = [];
-const indexToPlayerRound = [];
-const indexToStat = {};
-const indexToStatRound = {};
-const unresolvedPlayerQueue = [];
-
-const handleMinigame = ({ data, chIndex, result, states, changedProperties }) => {
-  let minigame = states.minigames[chIndex];
+const handleMinigame = ({ data, actorId, result, states, changedProperties }) => {
+  const volume = states.volumes[states.gameState.volumeId];
+  let minigame = states.minigames[actorId];
 
   if (!minigame) {
     minigame = {
@@ -37,13 +32,14 @@ const handleMinigame = ({ data, chIndex, result, states, changedProperties }) =>
       roundHistory: [],
     };
 
-    states.minigames[chIndex] = minigame;
+    states.minigames[actorId] = minigame;
     result.gameData.minigames.push(minigame);
-    states.gameState.minigameChIndex = chIndex;
+    states.gameState.minigameactorId = actorId;
   }
 
   if (data.CurrentState && data.CurrentState === 'PostGameTimeDilation') {
     const teams = {};
+    const teamsResult = {};
 
     minigame.TeamArray.forEach((team, index) => {
       if (team.winCount === undefined) {
@@ -74,11 +70,15 @@ const handleMinigame = ({ data, chIndex, result, states, changedProperties }) =>
 
       team.players[player.UniqueId] = {
         ...player,
-        roundStats: writePropertiesRecursive({}, minigame.roundStats[player.UniqueId] || {}),
+        roundStats: writePropertiesRecursive([], volume.stats.roundStats.playerStats.find(({Player}) => Player === player.UniqueId)?.stats || {}),
       };
+
+      if (!teamsResult[player.TeamIndex]) {
+        teamsResult[player.TeamIndex] = team;
+      }
     });
 
-    minigame.roundHistory.push(teams);
+    minigame.roundHistory.push(teamsResult);
   }
 
   for (let i = 0; i < changedProperties.length; i += 1) {
@@ -121,85 +121,6 @@ const handleMinigame = ({ data, chIndex, result, states, changedProperties }) =>
     }
 
     writePropertiesRecursive(minigame.ScoreboardStats, data.ScoreboardStats);
-  }
-
-  if (data.PlayerStats) {
-    // minigame.statsUpdates.push([minigame.CurrentState, data.PlayerStats]);
-    let currentStats;
-    let currentIndexToPlayer;
-    let currentIndexToStat;
-
-    const isPostGame = minigame.CurrentState === 'PostGameTimeDilation';
-    const isInProgress = minigame.CurrentState === 'InProgress';
-    const isMyGuder = data.PlayerStats.every(({ Player }) => Player);
-    const hasTotalStats = minigame.stats;
-
-    if (isPostGame || (!hasTotalStats && isMyGuder && isInProgress)) {
-      if (!hasTotalStats) {
-        minigame.stats = {};
-      }
-
-      currentIndexToPlayer = indexToPlayer;
-      currentIndexToStat = indexToStat;
-      currentStats = minigame.stats;
-    } else {
-      if (!minigame.roundStats) {
-        minigame.roundStats = {};
-      }
-
-      currentIndexToPlayer = indexToPlayerRound;
-      currentIndexToStat = indexToStatRound;
-      currentStats = minigame.roundStats;
-    }
-
-    data.PlayerStats.forEach(({ Stats, Player }, playerIndex) => {
-      let player = currentIndexToPlayer[playerIndex];
-
-      if (!player) {
-        currentIndexToPlayer[playerIndex] = Player;
-        player = Player;
-      }
-
-      if (!player) {
-        if (!unresolvedPlayerQueue[playerIndex]) {
-          unresolvedPlayerQueue[playerIndex] = [];
-        }
-
-        unresolvedPlayerQueue[playerIndex].push(Stats);
-
-        return;
-      }
-
-
-      if (!currentStats[player]) {
-        currentStats[player] = {};
-      }
-
-      if (!currentIndexToStat[player]) {
-        currentIndexToStat[player] = [];
-      }
-
-      const loopHandler = ({ Filter, Count }, statIndex) => {
-        let statName;
-
-        if (Filter) {
-          statName = Filter.name;
-          currentIndexToStat[player][statIndex] = statName;
-        } else {
-          statName = currentIndexToStat[player][statIndex];
-        }
-
-        currentStats[player][statName] = Count;
-      };
-
-      if (unresolvedPlayerQueue[playerIndex]) {
-        unresolvedPlayerQueue[playerIndex].forEach((stats) => {
-          stats.forEach(loopHandler);
-        });
-      }
-
-      Stats.forEach(loopHandler);
-    });
   }
 };
 

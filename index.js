@@ -1,12 +1,12 @@
 const fs = require('fs');
-const parse = require('fortnite-replay-parser');
+const { parse } = require('fortnite-replay-parser');
 const setListener = require('./export/setListener');
 const enums = require('./enums');
 const classes = require('./classes');
 const NetFieldExports = require('./netFieldExports');
 
 (async () => {
-  const replayBuffer = fs.readFileSync('replays/test2.replay');
+  const replayBuffer = fs.readFileSync('C:/Users/marcm/AppData/Local/FortniteGame/Saved/Demos/2022.03.00-18.38.replay');
 
   console.time();
   const parsedReplay = await parse(replayBuffer, {
@@ -18,7 +18,7 @@ const NetFieldExports = require('./netFieldExports');
     debug: true,
     handleEventEmitter: setListener,
     parseEvents: false,
-    useCheckpoints: true,
+    useCheckpoints: false,
   });
   console.timeEnd();
 
